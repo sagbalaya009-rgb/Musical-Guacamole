@@ -1,37 +1,39 @@
 # Musical Guacamole
 
-A mechatronics and audio-engineering prototype exploring a concealed surface-exciter system: instead of using a conventional speaker cone, electromagnetic exciters transfer vibration into a purpose-built panel so the panel itself radiates sound.
+A mechatronics and audio-engineering prototype exploring a concealed surface-exciter system: electromagnetic exciters transfer vibration into an engineered panel so the panel itself radiates sound.
 
 The first build is a **bench prototype using commercially available modules**. It is not a residential installation and does not require a custom PCB or custom exciter enclosure.
 
-## Current prototype definition
+## Finalized prototype architecture
 
-- **Sound source:** phone streaming music over Bluetooth Classic (A2DP).
-- **Actuators:** two commercially available surface exciters.
-- **Test surface:** a large, approximately 1 m × 1 m board as an initial working target; final dimensions and construction remain subject to practical and acoustic review.
-- **Audio processing:** DSP included from the beginning.
-- **Amplification:** two independent amplifier channels, one per exciter.
-- **Power:** external, regulated, isolated low-voltage DC supply selected after the amplifier and exciter are chosen.
-- **Electronics:** modular/hybrid off-the-shelf boards connected with appropriate wiring and connectors.
-- **Controls desired in the eventual phone interface:** master volume, bass, treble, EQ profiles and independent exciter/channel level.
-- **Primary proof points:** sound production, bass performance and clarity.
-- **Measurements:** acoustic, mechanical-vibration and electrical measurements.
-- **Enclosures:** custom puck/hub enclosures are out of scope for this prototype.
-- **Custom PCB:** out of scope; use development boards and modules.
+**Phone music app → Bluetooth Classic A2DP receiver with analogue line output → two-channel DSP → stereo two-channel amplifier → two surface exciters → test panel.**
 
-## Important architecture notes
+- **Music source:** ordinary phone apps (Spotify, Apple Music, YouTube, local files). The phone remains the streaming device.
+- **Wireless audio:** Bluetooth Classic A2DP. Use a receiver that exposes a proper analogue line-level L/R output.
+- **DSP:** one two-channel-input DSP with at least two independently processed outputs. Preferred learning/reference platform: Analog Devices ADAU1701-based board with analogue ADC inputs, DAC outputs and SigmaStudio support, subject to board-level interface verification.
+- **Amplification:** one stereo amplifier module with two genuinely independent channels; one exciter per channel. Two mono amplifier modules are also acceptable if they are electrically matched.
+- **Actuators:** two identical commercial surface exciters. Test one before purchasing the second.
+- **Panel:** approximately 1 m × 1 m as a provisional target. Material, thickness, support and exact dimensions remain experimental.
+- **Power:** certified, isolated, regulated external DC supply selected after amplifier and exciter compatibility checks.
+- **Integration:** modular wiring and commercial boards; no custom PCB, battery or custom enclosure in this prototype.
+- **Initial signal routing:** sum L+R inside the DSP to a mono-compatible programme, then feed that programme to both independent outputs. Keep per-channel gain available. Do not electrically short Bluetooth L and R together.
+- **Initial DSP preset:** flat EQ, conservative input/output levels, protective high-pass filter only when its cutoff is justified by exciter limits, no bass boost, no crossover and no artificial effects.
+- **Phone controls:** not part of the first build. Use the DSP vendor's PC/USB configuration tool. A later phone app will need a separate documented control path (for example BLE to a controller/DSP interface); A2DP is for audio, not custom DSP parameter control.
 
-1. Bluetooth Classic A2DP carries the music stream. It does **not** provide a general-purpose channel for a custom app to change DSP settings. For the first bench prototype, use the DSP manufacturer's USB/PC control interface (or its supported control interface). Add BLE or another control transport only when implementing phone-based DSP controls.
-2. Start with a mono-compatible test signal: sum left and right channels correctly in the DSP, then feed the same programme to both independent amplifier channels. This avoids treating two exciters on one panel as a conventional stereo pair. Independent gain/EQ/delay can be explored after baseline measurements.
-3. The two exciters must be electrically compatible with their respective amplifier channels. Do not select an amplifier based only on its advertised wattage.
-4. Select and validate one exciter model before buying the second. The intended prototype has two, but staged testing reduces cost and risk.
-5. A small or medium coupon can validate mounting and wiring; the larger board is needed for more meaningful panel-acoustic experiments. A 1 m × 1 m panel still does not prove full-wall bass performance.
+## Why this architecture
+
+1. Analogue line-level Bluetooth output makes the receiver-to-DSP connection straightforward and avoids early I²S clock, format and pin-compatibility work.
+2. A separate DSP lets us inspect and change the signal processing without replacing the Bluetooth or amplifier stages.
+3. One two-channel amplifier board keeps the build compact while preserving one independent power channel per exciter.
+4. A mono-compatible baseline avoids assuming that two exciters on one panel behave like left/right conventional speakers. Placement and panel modes must be measured.
+5. Commercial modules let us test the acoustic concept before investing in a custom PCB or enclosure.
 
 ## Project documents
 
 - [Puck and prototype engineering plan](docs/PUCK_DESIGN_PLAN.md)
-- [Decision log and unresolved engineering decisions](docs/DECISION_LOG.md)
+- [Decision log](docs/DECISION_LOG.md)
+- [DSP, Bluetooth and audio workflow](docs/DSP_AND_AUDIO_WORKFLOW.md)
 
-## Current status
+## Status
 
-**Concept architecture agreed; component selection and detailed design pending.** No exact exciter, amplifier, DSP, Bluetooth receiver, power supply or panel material has been approved yet. Do not order parts until their datasheets have been checked against the compatibility checklist in the engineering plan.
+**System architecture is defined; exact components are not yet approved.** The exciter remains the first hardware selection because its impedance, power rating, mounting method and mechanical limits determine the amplifier, supply, panel coupling and protection settings. Do not order a complete set of parts until the exact datasheets have been checked together.
