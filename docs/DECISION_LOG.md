@@ -1,69 +1,81 @@
 # Decision Log — Musical Guacamole
 
-This file separates decisions already made from recommendations and unresolved engineering questions. A design target is not a measured result.
+This log distinguishes agreed product requirements, finalized architecture decisions and hardware choices that still require datasheet evidence. A design target is not a measured result.
 
-## Accepted project decisions
+## Finalized architecture decisions
 
-| ID | Decision | Status / implications |
+| ID | Decision | Rationale |
 |---|---|---|
-| D-01 | Use an existing commercial surface exciter | Accepted. No custom actuator development for the first prototype. |
-| D-02 | Prototype with two exciters | Accepted. Test one first, then add the second. |
-| D-03 | Keep exciter positions experimental | Accepted. Use adjustable mounting and a coordinate log. |
-| D-04 | Bluetooth Classic for music | Accepted. Phone streaming apps supply the music; no custom streaming service. |
-| D-05 | Include DSP | Accepted. Start with a documented, flat baseline preset. |
-| D-06 | Independent amplifier channel per exciter | Accepted. Do not wire both exciters to one channel by default. |
-| D-07 | External DC supply | Accepted. No battery in first prototype. |
-| D-08 | Off-the-shelf modular/hybrid electronics | Accepted in principle; assistant to choose integration details after datasheets are compared. |
-| D-09 | Phone controls desired | Master volume, bass, treble, EQ and channel levels. Not yet implemented. |
-| D-10 | Primary goals | Sound production, bass and clarity. |
-| D-11 | Large test board | Accepted as a direction; 1 m × 1 m is provisional only. |
-| D-12 | Material undecided | Choose through comparison and tests. |
-| D-13 | Manufacturer-prescribed mounting | Default; actual method depends on selected exciter. |
-| D-14 | Test full-range before frequency splitting | Accepted experimental sequence. |
-| D-15 | Comprehensive measurements | Acoustic microphone, panel accelerometer and electrical measurements. |
-| D-16 | No custom enclosure for now | Accepted. |
-| D-17 | No custom PCB for now | Accepted. |
+| D-01 | Use commercial surface exciters | The first prototype tests panel acoustics, not custom actuator manufacturing. |
+| D-02 | Plan for two identical exciters; test one first | Matching improves repeatability; staged purchase reduces risk. |
+| D-03 | Keep exciter positions adjustable | Panel modes and coupling determine useful positions; placement must be measured. |
+| D-04 | Bluetooth Classic A2DP for music | Standard music streaming from ordinary phone apps. |
+| D-05 | Bluetooth receiver uses analogue stereo line output | Simplifies receiver-to-DSP integration and avoids early I²S compatibility work. |
+| D-06 | Use a separate two-channel DSP | Processing remains independently configurable and measurable. |
+| D-07 | ADAU1701/SigmaStudio is the reference learning platform | Graphical signal-flow programming, analogue ADC/DAC and enough processing for initial EQ/filter/routing experiments. Exact board must be checked before purchase. |
+| D-08 | DSP provides at least two independent outputs | One separately controlled signal path per exciter. |
+| D-09 | Mix L+R inside DSP, then duplicate mono-compatible signal | Avoids assuming two panel exciters behave like conventional stereo speakers; avoids electrically shorting L/R. |
+| D-10 | Start with flat EQ and conservative level | Establish a repeatable baseline before tuning. |
+| D-11 | Start full-range only within safe actuator limits; add protective high-pass as justified | Avoids arbitrary crossover choices while protecting the exciter from unsafe low-frequency excursion. |
+| D-12 | Use one stereo two-channel amplifier, one channel per exciter | Compact and independently driven; matched mono boards are an acceptable alternative. |
+| D-13 | External certified isolated regulated DC supply | Avoids battery/charging complexity and keeps mains wiring out of the bench prototype. |
+| D-14 | Modular/hybrid off-the-shelf electronics | Replaceable and easier to debug than a custom PCB. |
+| D-15 | No microcontroller in first prototype | No essential first-build function requires custom firmware. |
+| D-16 | PC/USB DSP tuning first | Vendor tool provides direct configuration without building a phone app. |
+| D-17 | Defer phone DSP controls; later add separate BLE/control path | A2DP carries audio and is not a custom DSP parameter-control interface. |
+| D-18 | No custom PCB, battery or enclosure in first prototype | These do not validate the core acoustic hypothesis. |
+| D-19 | Test panel target approximately 1 m × 1 m | Practical provisional bench target; not a full-wall performance surrogate. |
+| D-20 | Panel material remains experimental | Material, thickness and support alter panel modes and must be compared. |
+| D-21 | Manufacturer-prescribed exciter mounting | Coupling is central to performance; improvised mounting invalidates comparisons. |
+| D-22 | Measure acoustic, mechanical and electrical behaviour | SPL/frequency response alone cannot explain vibration, power or thermal limits. |
 
-## Assistant engineering recommendations
+## Reference audio path
 
-| ID | Recommendation | Reason |
-|---|---|---|
-| R-01 | Use a mono-compatible baseline signal duplicated to two independent outputs | Two exciters on one panel are not automatically a conventional stereo pair. |
-| R-02 | Use DSP vendor's USB/PC interface for initial tuning | A2DP transports music; it is not a custom DSP control channel. |
-| R-03 | Defer a custom phone app and BLE control until hardware is selected | Avoid designing an app around an unknown DSP/control API. |
-| R-04 | Buy one exciter first, verify, then buy the second matching unit | Reduce component-selection risk and avoid buying six or two unverified units. |
-| R-05 | Select amplifier and power supply from actual datasheet requirements | Headline wattage alone is not a compatibility check. |
-| R-06 | Do not add a microcontroller unless a concrete control/protection requirement justifies it | The DSP and receiver may cover initial prototype needs. |
+Phone music app  
+→ Bluetooth Classic A2DP receiver with analogue L/R line output  
+→ DSP (L/R analogue input; two independent processed outputs)  
+→ stereo two-channel amplifier  
+→ exciter 1 and exciter 2  
+→ test panel.
 
-## Open decisions — resolve in this order
+The amplifier's supply is selected after its exact model and load are known. Lower-voltage receiver/DSP boards receive only their specified rails.
 
-| Priority | Question | Evidence needed |
-|---|---|---|
-| P0 | Which exact surface exciter model? | Manufacturer datasheet, availability, cost, mounting instructions |
-| P0 | Which amplifier module? | Output into actual impedance at selected supply voltage, thermal/protection data |
-| P0 | Which DSP? | Two independent outputs, input compatibility, EQ/filter features, control interface |
-| P0 | Which Bluetooth receiver? | A2DP support, output type/level, power requirements |
-| P0 | Which DC supply? | Derived from amplifier voltage/current requirements |
-| P1 | What exact panel material and thickness? | Candidate sample comparison and repeatable test fixture |
-| P1 | What final test-panel dimensions/support? | Practical build constraints and acoustic experiment goals |
-| P1 | What mounting layout? | Placement measurements on the chosen panel |
-| P1 | What measurement microphone and accelerometer? | Budget, calibration and data acquisition compatibility |
-| P2 | How will phone controls work? | Selected DSP's documented API/control interface; BLE or other transport |
-| P2 | Does the design need a microcontroller? | Defined control, sequencing or protection requirements |
-| P2 | What is the final enclosure? | Deliberately deferred until electronics and thermal requirements are known |
+## Why not integrate everything into one board?
 
-## Important correction: Bluetooth audio versus phone controls
+An integrated Bluetooth/DSP/amplifier board can reduce wiring, but it makes it harder to isolate faults and may constrain DSP routing, output power, cooling or future module replacement. A modular first prototype is easier to learn from and compare. Integration can be reconsidered after the acoustic design is validated.
 
-Bluetooth Classic A2DP is appropriate for streaming music from a phone. It does not automatically let a custom app adjust DSP parameters. The first prototype should stream music over A2DP and tune DSP settings through the DSP manufacturer's USB/PC tool or documented interface. Phone-based controls require a separate control path, for example BLE, and a DSP/controller that exposes a usable API.
+## Why not stream digital I²S directly into the DSP?
+
+I²S can reduce an extra digital-to-analogue conversion, but it requires compatible clock master/slave configuration, sample rate, word length, channel mapping and electrical pinout. For a first mechatronics/audio prototype, analogue line output is the lower-risk interface. Revisit I²S only if measured noise or signal-quality limitations justify it.
+
+## Why not use the phone as the DSP?
+
+The phone is already responsible for streaming and user interaction. A phone-based audio-processing path would introduce operating-system routing, latency, app and device compatibility issues. A dedicated DSP gives a stable repeatable signal chain independent of the phone model.
+
+## Still-open hardware selections (not architecture decisions)
+
+These remain deliberately unresolved until exact datasheets and availability are compared:
+
+1. Exact surface exciter model and impedance/power rating.
+2. Exact two-channel amplifier and its supply requirements.
+3. Exact ADAU1701 development/module board or alternative DSP board.
+4. Exact A2DP receiver with analogue line output.
+5. Exact regulated DC supply and any lower-voltage converters.
+6. Exact panel material, thickness, dimensions and support.
+7. Measurement microphone, accelerometer and acquisition method.
+
+**Selection order:** exciter → amplifier → DSP board → Bluetooth receiver → power supply → panel construction and mounting details. The receiver/DSP interface is already defined as analogue line-level, but exact modules still need matching.
+
+## Future feature decisions
+
+| Feature | Decision |
+|---|---|
+| Phone volume/EQ/bass/treble/per-channel control | Desired future feature; not first-build scope |
+| BLE control | Likely option, only after DSP control interface is verified |
+| Custom phone app | Defer until hardware and parameter-control protocol are proven |
+| Automatic room/panel calibration | Research after repeatable measurement system exists |
+| Custom PCB/enclosure | Revisit only after module-level prototype is validated |
 
 ## Change control
 
-When a decision changes, record:
-- Decision ID
-- Previous decision
-- New decision
-- Reason/evidence
-- Date
-- Whether the change affects parts already purchased or drawings already produced
-
-Never mark a component as selected until its exact model and datasheet have been reviewed.
+When a decision changes, record the ID, previous decision, new decision, evidence/reason, date and impact on purchased parts or drawings. Never mark a component selected until its exact model and datasheet have been reviewed.
